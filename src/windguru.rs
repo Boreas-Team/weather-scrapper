@@ -24,22 +24,22 @@ struct ModelForecastRoot {
 #[allow(non_snake_case)]
 struct ModelForecast {
     initstamp: u32,
-    GUST: Vec<f64>,
-    WINDSPD: Vec<f64>,
+    GUST: Vec<f32>,
+    WINDSPD: Vec<f32>,
     hours: Vec<u16>,
 }
 
-pub struct WindguruClient {
+pub struct Client {
     client: reqwest::Client,
 }
 
-impl Default for WindguruClient {
+impl Default for Client {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl WindguruClient {
+impl Client {
     const URL: &str = "https://www.windguru.cz/int/iapi.php";
     const GFS13: u16 = 3;
 
@@ -57,25 +57,25 @@ impl WindguruClient {
         }
     } 
 
-    async fn get_spot_forecast(&self, spot_id: u32) -> Result<SpotForecast, reqwest::Error> {       
-        self.client.get(format!("{}?q=forecast_spot&id_spot={}", WindguruClient::URL, spot_id))
+    async fn get_spot_forecast(&self, spot_id: i32) -> Result<SpotForecast, reqwest::Error> {       
+        self.client.get(format!("{}?q=forecast_spot&id_spot={}", Client::URL, spot_id))
             .send().await?
             .json::<SpotForecast>().await
     }
 
-    async fn get_model_forecast(&self, spot_id: u32, model_id: u16, initstr: &str) -> Result<ModelForecastRoot, reqwest::Error> {
-        self.client.get(format!("{}?q=forecast&id_spot={}&id_model={}&initstr={}", WindguruClient::URL, spot_id, model_id, initstr))
+    async fn get_model_forecast(&self, spot_id: i32, model_id: u16, initstr: &str) -> Result<ModelForecastRoot, reqwest::Error> {
+        self.client.get(format!("{}?q=forecast&id_spot={}&id_model={}&initstr={}", Client::URL, spot_id, model_id, initstr))
             .send().await?
             .json::<ModelForecastRoot>().await
     }
 
-    pub async fn get_forecast(&self, spot_id: u32) -> Result<Forecast, reqwest::Error> {
+    pub async fn get_forecast(&self, spot_id: i32) -> Result<Forecast, reqwest::Error> {
         let spot = self.get_spot_forecast(spot_id).await?;
-        let gfs13 = spot.fcst.iter().find(|model| model.id_model == WindguruClient::GFS13)
+        let gfs13 = spot.fcst.iter().find(|model| model.id_model == Client::GFS13)
             .expect("Other models than GFS13 are not supported");
 
         let forecast = self.get_model_forecast(spot_id, 
-            WindguruClient::GFS13, 
+            Client::GFS13, 
             gfs13.initstr.as_str()).await?;
 
         let start_time = OffsetDateTime::from_unix_timestamp(forecast.fcst.initstamp.into())
@@ -99,12 +99,12 @@ impl WindguruClient {
 
 #[derive(Debug)]
 pub struct Forecast {
-    entries: Vec<ForecastEntry>,
+    pub entries: Vec<ForecastEntry>,
 }
 
 #[derive(Debug)]
 pub struct ForecastEntry {
     pub time: OffsetDateTime,
-    pub wind_speed: f64,
-    pub wind_gusts: f64
+    pub wind_speed: f32,
+    pub wind_gusts: f32
 }

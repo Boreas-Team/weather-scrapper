@@ -42,10 +42,18 @@ psql -h localhost -U postgres
 
 ```sql
 CREATE TABLE spots (
-    spot_id             varchar(64)              NOT NULL,
+    spot_id             integer                  NOT NULL,
     name                varchar(100)             NOT NULL,
     windguru_spot_id    integer                  NOT NULL
 )
 
 INSERT INTO spots VALUES (7, 'Lagos', 48968);
+
+CREATE TABLE spot_forecast (
+    spot_id integer NOT NULL,
+    forecast_time timestamptz NOT NULL,
+    wind_speed float(8) NOT NULL,
+    wind_gusts float(8) NOT NULL,
+    PRIMARY KEY (spot_id, forecast_time)
+);
 ```
