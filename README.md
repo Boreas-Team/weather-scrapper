@@ -27,3 +27,25 @@ Algorithm `load_forecast(spot_id)`:
     }
 ]
 ```
+
+Local Development:
+```
+docker run --name boreas-db -p 5432:5432 -e POSTGRES_PASSWORD=dinnerlady -d postgres
+# db=postgres password=dinnerlady host=127.0.0.1:5432
+
+brew install libpq
+echo 'export PATH="/usr/local/opt/libpq/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+psql -h localhost -U postgres
+```
+
+```sql
+CREATE TABLE spots (
+    spot_id             varchar(64)              NOT NULL,
+    name                varchar(100)             NOT NULL,
+    windguru_spot_id    integer                  NOT NULL
+)
+
+INSERT INTO spots VALUES (7, 'Lagos', 48968);
+```
