@@ -13,7 +13,7 @@ pub struct Spot {
 impl Client {
     pub async fn new() -> Result<Client, tokio_postgres::Error> {
         let (client, connection) = 
-            tokio_postgres::connect("host=localhost user=postgres password=dinnerlady", NoTls).await?;
+            tokio_postgres::connect("host=localhost user=postgres password=dinnerlady dbname=boreas", NoTls).await?;
 
         // The connection object performs the actual communication with the database,
         // so spawn it off to run on its own.
