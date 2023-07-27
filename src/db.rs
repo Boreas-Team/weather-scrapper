@@ -29,7 +29,7 @@ impl Client {
     }
 
     pub async fn get_all_spots(&self) -> Result<Vec<Spot>, tokio_postgres::Error> {
-        let rows = self.client.query("SELECT spot_id, name, windguru_spot_id FROM spots", &[])
+        let rows = self.client.query("SELECT id, wg_name, wg_id FROM spot", &[])
             .await?;
     
         let mut spots = vec![];
