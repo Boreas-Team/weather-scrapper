@@ -35,7 +35,7 @@ async fn main() -> Result<(), tokio_postgres::Error> {
             }
 
             println!("Upserted forecast for {spot_id}: {name}");
-        }))
+        }));
     }
 
     for future in futures {

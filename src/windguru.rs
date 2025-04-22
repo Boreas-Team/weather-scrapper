@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::{collections::{BTreeMap, HashMap}, ops::Add};
 
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde::Deserialize;
@@ -6,7 +6,13 @@ use time::{OffsetDateTime, Duration};
 
 #[derive(Deserialize, Debug)]
 struct SpotForecast {
-    fcst: Vec<SpotForecastModel>,
+    tabs: Vec<SpotModelData>,
+}
+
+#[derive(Deserialize, Debug)]
+struct SpotModelData {
+    id_model: u16,
+    id_model_arr: Vec<SpotForecastModel>
 }
 
 #[derive(Deserialize, Debug)]
@@ -70,9 +76,9 @@ impl Client {
     }
 
     pub async fn get_forecast(&self, spot_id: i32) -> Result<Forecast, reqwest::Error> {
-        let spot = self.get_spot_forecast(spot_id).await?;
-        let gfs13 = spot.fcst.iter().find(|model| model.id_model == Client::GFS13)
-            .expect("Other models than GFS13 are not supported");
+        let spot: SpotForecast = self.get_spot_forecast(spot_id).await?;
+        let tab = spot.tabs.iter().find(|m| m.id_model == Client::GFS13).expect("Other models than GFS13 are not supported");
+        let gfs13 = tab.id_model_arr.iter().find(|m| m.id_model == Client::GFS13).expect("Other models than GFS13 are not supported");            
 
         let forecast = self.get_model_forecast(spot_id, 
             Client::GFS13, 
